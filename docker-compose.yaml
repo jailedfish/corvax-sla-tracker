@@ -1,0 +1,28 @@
+services:
+  grafana:
+    image: grafana/grafana:11.6.0
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-store:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=adminus
+  influx:
+    image: influxdb:2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=superuserus
+      - DOCKER_INFLUXDB_INIT_ORG=jailedorg
+      - DOCKER_INFLUXDB_INIT_BUCKET=main
+    ports:
+      - 8086:8086
+    volumes:
+      - influx-config:/etc/influxdb
+      - influx-store:/var/lib/influxdb
+
+volumes:
+  grafana-store: {}
+  influx-store: {}
+  influx-config: {}
