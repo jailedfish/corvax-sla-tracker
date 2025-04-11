@@ -1,13 +1,31 @@
 services:
-  grafana:
-    image: grafana/grafana:11.6.0
-    restart: unless-stopped
-    ports:
-      - 3000:3000
-    volumes:
-      - grafana-store:/var/lib/grafana
+  scrapper:
+    build:
+      context: .
+      dockerfile: scrapper.Dockerfile
+      tags:
+        - scrapper:latest
+    depends_on:
+      - influx
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=adminus
+      - INFLUXDB_URL=http://influx:8086
+
+  web:
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+      tags:
+        - web:latest
+    depends_on:
+      - influx
+    ports:
+      - 8080:8081
+    environment:
+      - INFLUXDB_URL=http://influx:8086
+    env_file:
+      - path: .env
+
+
   influx:
     image: influxdb:2
     environment:
@@ -16,6 +34,7 @@ services:
       - DOCKER_INFLUXDB_INIT_PASSWORD=superuserus
       - DOCKER_INFLUXDB_INIT_ORG=jailedorg
       - DOCKER_INFLUXDB_INIT_BUCKET=main
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=xBqF4kCfBo80AF6Icflut7YN2-3AoDSDekJbxif38OVa8y4EuVaomUlXMZ6MPBX_XQAzdiPcViZr_2eMsK-KVw==
     ports:
       - 8086:8086
     volumes:
@@ -23,6 +42,5 @@ services:
       - influx-store:/var/lib/influxdb
 
 volumes:
-  grafana-store: {}
   influx-store: {}
   influx-config: {}

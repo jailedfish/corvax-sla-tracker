@@ -7,7 +7,6 @@ from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
 from influxdb_client import Point
 
 load_dotenv()
-print(env.get('FETCH_URL'))
 
 import shlex
 from subprocess import Popen, PIPE, STDOUT

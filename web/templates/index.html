@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Server SLA Monitor</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary: #3498db;
@@ -12,6 +14,7 @@
             --danger: #e74c3c;
             --gray: #ecf0f1;
             --dark: #34495e;
+            --bg: #f9f9f9;
         }
 
         body {
@@ -21,7 +24,32 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: var(--bg);
+        }
+
+        h1 {
+            color: var(--dark);
+            font-weight: 300;
+            margin: 0;
+        }
+
+        button {
+            background-color: var(--bg);
+            border: 0px;
+            padding: 8px 16px;
+            margin: 8px 8px;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0;
+        }
+
+        button:hover {
+            background-color: var(--gray);
         }
 
         header {
@@ -29,12 +57,11 @@
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--gray);
+            position: relative;
         }
 
-        h1 {
-            color: var(--dark);
-            font-weight: 300;
-            margin: 0;
+        .server-data {
+            margin: 8px 8px;
         }
 
         .server-info {
@@ -48,6 +75,11 @@
         .server-name {
             font-size: 1.5rem;
             margin: 0 0 10px 0;
+            color: var(--dark);
+        }
+
+        .server-list {
+            font-size: 1.25rem;
             color: var(--dark);
         }
 
@@ -69,7 +101,7 @@
 
         .metrics {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-top: 20px;
         }
@@ -136,16 +168,74 @@
             color: #95a5a6;
             margin-top: 30px;
         }
+
+        /* Submenu animation styles */
+        #servers-data {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition:
+                max-height 0.3s ease-out,
+                opacity 0.2s ease-out,
+                margin 0.3s ease-out;
+            margin: 0;
+            padding: 0 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 0 0 5px 5px;
+        }
+
+        #servers-data.expanded {
+            max-height: 2000px; /* Adjust based on your content */
+            opacity: 1;
+            margin: 10px -20px -20px -20px;
+            padding: 0 20px 20px 20px;
+            transition:
+                max-height 0.5s ease-in,
+                opacity 0.3s ease-in,
+                margin 0.3s ease-in;
+        }
+
+        .server-list i {
+            transition: transform 0.3s ease;
+        }
+
+        .server-list.expanded i {
+            transform: rotate(180deg);
+        }
+
+        /* Server items animation */
+        .server-item {
+            animation: fadeIn 0.5s ease-out;
+            margin: 8px 8 px important!;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Server SLA Monitor</h1>
+        <h1>Corvax SLA Monitor</h1>
+        <div class="server-selector">
+            <div class="server-dropdown">
+                <button class="server-dropbtn">Select Server ▼</button>
+                <div class="server-dropdown-content" id="server-dropdown">
+                </div>
+            </div>
+        </div>
     </header>
 
     <main>
         <div class="server-info">
-            <h2 class="server-name">Production Server #1</h2>
+            <h2 class="server-name">Собственно Сервер</h2>
             <p>
                 {% if is_up %}
                 <span class="status-indicator status-up"></span>
@@ -167,28 +257,78 @@
                     <p class="metric-value">{{ ping }}мс</p>
                 </div>
             </div>
+
+            <button class="server-list" id="toggle-servers">
+                Сервера <i class="fas fa-caret-down"></i>
+            </button>
+
+            <div class="server-info server-data" id="servers-data">
+                {% for server in servers %}
+                <div class="server-item">
+                    <h3>{{server['name']}}</h3>
+                    <div class="metrics" style="width: 100%">
+                        <div class="metric-card">
+                            <p class="metric-title">Кол-во игроков</p>
+                            <p class="metric-value">{{ server['player_count'] }}/{{ server['max_players'] }}</p>
+                        </div>
+                        <div class="metric-card">
+                            <p class="metric-title">Время раунда</p>
+                            <p class="metric-value">{{ server['round_time'] }}</p>
+                        </div>
+                        <div class="metric-card">
+                            <p class="metric-title">Режим (тоталитарный)</p>
+                            <p class="metric-value">{{server['preset']}}</p>
+                        </div>
+                        <div class="metric-card">
+                            <p class="metric-title">Карта</p>
+                            <p class="metric-value">{{server['map']}}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
 
         <div class="sla-gauge">
-            <h3>Monthly uptime (больше - лучше)</h3>
+            <h3>Monthly SLA (больше - лучше)</h3>
             <p class="sla-percentage">{{ monthly_uptime }}%</p>
             <p class="sla-label">(Target: 99.9%)</p>
-
             <div class="gauge-container">
                 <div class="gauge-fill" style="width: {{ monthly_uptime }}%"></div>
             </div>
-
             <div style="display: flex; justify-content: space-between;">
                 <span>0%</span>
                 <span>100%</span>
             </div>
+            <p class="sla-label">Первое измерение: {{ first_metric_month }}</p>
+        </div>
+
+        <div class="sla-gauge">
+            <h3>Yearly SLA (больше - лучше)</h3>
+            <p class="sla-percentage">{{ yearly_uptime }}%</p>
+            <p class="sla-label">(Target: 99.9%)</p>
+            <div class="gauge-container">
+                <div class="gauge-fill" style="width: {{ yearly_uptime }}%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>0%</span>
+                <span>100%</span>
+            </div>
+            <p class="sla-label">Первое измерение: {{ first_metric_year }}</p>
         </div>
 
         <p class="last-updated">Last updated: <span id="update-time">Just now</span></p>
     </main>
 
     <script>
-        // Simple script to update the "last updated" time
+        // Toggle servers submenu
+        document.getElementById('toggle-servers').addEventListener('click', function() {
+            const serversData = document.getElementById('servers-data');
+            this.classList.toggle('expanded');
+            serversData.classList.toggle('expanded');
+        });
+
+        // Update time
         function updateTime() {
             const now = new Date();
             const timeString = now.toLocaleTimeString();
@@ -199,9 +339,8 @@
             location.reload();
         }
 
-        // Update time initially and then every minute
         updateTime();
-        setInterval(reload, 10000);
+        setInterval(reload, 100000);
     </script>
 </body>
 </html>
