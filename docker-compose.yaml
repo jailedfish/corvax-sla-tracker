@@ -18,12 +18,13 @@ services:
         - web:latest
     depends_on:
       - influx
+      - scrapper
     ports:
       - 8080:8081
     environment:
       - INFLUXDB_URL=http://influx:8086
     env_file:
-      - path: .env
+      - .env
 
 
   influx:

@@ -10,7 +10,7 @@ load_dotenv()
 
 import shlex
 from subprocess import Popen, PIPE, STDOUT
-
+from pyping
 def get_simple_cmd_output(cmd, stderr=STDOUT):
     args = shlex.split(cmd)
     return Popen(args, stdout=PIPE, stderr=stderr).communicate()[0]

@@ -7,5 +7,5 @@ RUN [ "apt", "update", "-y"]
 RUN [ "apt", "install", "-y", "fping" ]
 
 COPY scrapper/ /app
-
+COPY .env /app
 ENTRYPOINT [ "python", "docker-loop.py" ]
