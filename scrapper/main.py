@@ -10,19 +10,11 @@ load_dotenv()
 
 import shlex
 from subprocess import Popen, PIPE, STDOUT
-from pyping
-def get_simple_cmd_output(cmd, stderr=STDOUT):
-    args = shlex.split(cmd)
-    return Popen(args, stdout=PIPE, stderr=stderr).communicate()[0]
+import pyping
 
 def get_ping_time(host):
-    host = host.split(':')[0]
-    cmd = "fping {host} -C 3 -q".format(host=host)
-    res = [float(x) for x in get_simple_cmd_output(cmd).strip().split()[-1].split() if x != '-']
-    if len(res) > 0:
-        return sum(res) / len(res)
-    else:
-        return -1
+    return pyping.ping(host, udp=True).avg_rtt
+
 
 async def fetch():
     client = InfluxDBClientAsync(url=env.get('INFLUXDB_URL'), token=env.get('INFLUXDB_TOKEN'),
