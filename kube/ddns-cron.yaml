@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ddns-update
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: ubuntu:latest
+            imagePullPolicy: IfNotPresent
+            command:
+            - curl
+            - https://ipv4.cloudns.net/api/dynamicURL/?q=OTIzNzQ3MDo1OTQwNjIwMDA6MWU5Y2E1NGY4YzJlOWMwMjVmZTE2ZDhlNDU1NTE1NWZhZWM1OGFhMjljMGFhNzY1YmU1NTBhZjU2NDRlYzY2Mw
+
+          restartPolicy: OnFailure
+      backoffLimit: 5
