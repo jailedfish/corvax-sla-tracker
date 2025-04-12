@@ -3,6 +3,8 @@ Best way to track server sla of "СЕТЬ КОРВАКС"
 
 И да, 10% это тоже своего рода неплохо.
 
+![Сеть корвакс](https://github.com/jailedfish/corvax-sla-tracker/blob/master/static/corvax_net.gif)
+
 ## Selfhost
 ~~~shell
 docker-compose up -d
@@ -14,4 +16,3 @@ docker-compose up -d
 Собственно: код является собственностью автора и любое его использование не допускается до того, как пользователь поставил звезду на репозиторий по [этому адресу](https://github.com/jailedfish/corvax-sla-tracker).
 После выполнения вышеуказанного требования код для вас распространяется по лицензии GNU GPLv3.
 
-![Сеть корвакс](https://github.com/jailedfish/corvax-sla-tracker/blob/master/static/corvax_net.gif)
