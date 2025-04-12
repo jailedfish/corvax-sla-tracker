@@ -26,7 +26,7 @@ async def fetch():
             status_point = (Point("status_probe")
                             .tag('status', 'ok' if resp.ok else 'err')
                             .field('status_code', resp.status))
-            ping = get_ping_time('station14.ru:443')
+            ping = get_ping_time('station14.ru')
             ping_point = (Point("ping_probe")
                           .tag('status', 'ok' if ping != -1 else 'err')
                           .field('ping', ping))
