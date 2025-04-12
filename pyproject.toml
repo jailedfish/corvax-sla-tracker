@@ -14,8 +14,8 @@ ago = "^0.1.0"
 requests = "^2.32.3"
 flask = "^3.1.0"
 dotenv = "^0.9.9"
-pyping = "^0.0.6"
-
+pyping-py3 = "^0.0.7"
+aiohttp = "^3.11.16"
 
 [build-system]
 requires = ["poetry-core"]

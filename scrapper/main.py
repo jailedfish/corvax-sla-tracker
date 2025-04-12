@@ -10,10 +10,10 @@ load_dotenv()
 
 import shlex
 from subprocess import Popen, PIPE, STDOUT
-import pyping
+from pyping_py3 import ping
 
 def get_ping_time(host):
-    return pyping.ping(host, udp=True).avg_rtt
+    return ping(host, udp=True).avg_rtt
 
 
 async def fetch():
