@@ -23,7 +23,7 @@ services:
     environment:
       - INFLUXDB_URL=http://influx:8086
     env_file:
-      - path: .env
+      - .env
 
 
   influx:

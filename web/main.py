@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 load_dotenv()
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-print(env)
 client = InfluxDBClient(url=env.get('INFLUXDB_URL'), token=env.get('INFLUXDB_TOKEN'),
                                  org=env.get('INFLUXDB_ORG'))
 query_api = client.query_api()
@@ -67,22 +66,24 @@ def get_stats() -> dict[str, int|str]:
     res = query_api.query(ping_query)
     return json.loads(res.to_json())[0]
 
-def get_ss14_stats(server_name):
+def get_ss14_stats():
     result = []
     try:
         servers = requests.get('https://hub.spacestation14.com/api/servers').json()
-        corvax_host = {}
         for server in servers:
+            print(server)
             if 'corvax' in server['statusData'].get('name', '').lower():
                 corvax_host = server['statusData']
 
                 buf = {'max_players': corvax_host.get('soft_max_players', 100),
-                       'player_count': corvax_host.get('players', -1), 'round_time': '---'}
-                print(corvax_host)
-                buf['round_time'] = ago.human(datetime.now() - datetime.fromisoformat(corvax_host.get('round_start_time', datetime.now().isoformat()).replace('Z', '+00:00')).replace(tzinfo=None))
-                buf['preset'] = corvax_host.get('preset', 'Секрет')
-                buf['name'] = corvax_host.get('name', '')
-                buf['map'] = corvax_host.get('map', 'unknown')
+                       'player_count': corvax_host.get('players', -1),
+                       'round_time': ago.human(
+                            datetime.now() - datetime.fromisoformat(corvax_host.get('round_start_time',
+                                                                    datetime.now().isoformat()).replace('Z', '+00:00'))
+                                                                    .replace(tzinfo=None)),
+                       'preset': corvax_host.get('preset', 'Секрет'),
+                       'name': corvax_host.get('name', ''), 'map': corvax_host.get('map', 'unknown')}
+
                 result.append(buf)
     except Exception as e:
         print(e)
@@ -92,9 +93,8 @@ def get_ss14_stats(server_name):
 
 @app.get('/')
 def get_index():
-    sv_name = request.args.get('server')
     stats = get_stats()
-    c_stats = get_ss14_stats(sv_name)
+    c_stats = get_ss14_stats()
     return render_template('index.html',
                            is_up=stats.get('status', 'err') == 'ok',
                            daily_uptime=stats.get('sla_daily', 100),
