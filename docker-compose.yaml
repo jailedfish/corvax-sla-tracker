@@ -9,6 +9,8 @@ services:
       - influx
     environment:
       - INFLUXDB_URL=http://influx:8086
+    networks:
+      influx_access: {}
 
   web:
     build:
@@ -19,12 +21,44 @@ services:
     depends_on:
       - influx
       - scrapper
-    ports:
-      - 8080:8081
     environment:
       - INFLUXDB_URL=http://influx:8086
     env_file:
       - .env
+    deploy:
+      mode: replicated
+      replicas: 5
+    networks:
+      influx_access: {}
+      front: {}
+
+  certbot:
+    build:
+      context: compose/shared-volumes/certbot/.
+      dockerfile: ../../../certbot.Dockerfile
+    volumes:
+      - nginx-certs:/var/certs
+    environment:
+      - DOMAIN_URL=corvaxmon.ip-ddns.com
+      - DOMAIN_EMAIL=spamgate1945@gmail.com
+    networks:
+      certnet: { }
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./compose/shared-volumes/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx-certs:/etc/nginx
+    depends_on:
+      - web
+      - certbot
+    networks:
+      certnet: { }
+      front: { }
 
 
   influx:
@@ -41,7 +75,15 @@ services:
     volumes:
       - influx-config:/etc/influxdb
       - influx-store:/var/lib/influxdb
+    networks:
+      influx_access: { }
+
+networks:
+  certnet: {}
+  front: {}
+  influx_access: {}
 
 volumes:
   influx-store: {}
   influx-config: {}
+  nginx-certs: {}
