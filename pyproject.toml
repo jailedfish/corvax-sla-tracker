@@ -3,9 +3,9 @@ name = "corvax-sla-tracker"
 version = "0.1.0"
 description = "Best way to track server sla of \"СЕТЬ КОРВАКС\""
 authors = ["Jailedfish"]
-license = "MIT"
+license = "GPLv3 modified"
 readme = "README.md"
-package-mode = false
+#package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
