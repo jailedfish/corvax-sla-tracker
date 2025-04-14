@@ -169,32 +169,6 @@
             margin-top: 30px;
         }
 
-        /* Submenu animation styles */
-        #servers-data {
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition:
-                max-height 0.3s ease-out,
-                opacity 0.2s ease-out,
-                margin 0.3s ease-out;
-            margin: 0;
-            padding: 0 20px;
-            background-color: rgba(255, 255, 255, 0.7);
-            border-radius: 0 0 5px 5px;
-        }
-
-        #servers-data.expanded {
-            max-height: 2000px; /* Adjust based on your content */
-            opacity: 1;
-            margin: 10px -20px -20px -20px;
-            padding: 0 20px 20px 20px;
-            transition:
-                max-height 0.5s ease-in,
-                opacity 0.3s ease-in,
-                margin 0.3s ease-in;
-        }
-
         .server-list i {
             transition: transform 0.3s ease;
         }
@@ -203,11 +177,6 @@
             transform: rotate(180deg);
         }
 
-        /* Server items animation */
-        .server-item {
-            animation: fadeIn 0.5s ease-out;
-            margin: 8px 8 px important!;
-        }
 
         @keyframes fadeIn {
             from {
@@ -219,18 +188,57 @@
                 transform: translateY(0);
             }
         }
+        #servers-data {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+        max-height 0.3s ease-out,
+        opacity 0.2s ease-out;
+    margin: 0;
+    padding: 0 20px;
+    background-color: white;
+    border-radius: 0 0 5px 5px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+#servers-data.expanded {
+    max-height: 5000px; /* Increased to accommodate more servers */
+    opacity: 1;
+    padding: 15px 20px 20px 20px;
+    transition:
+        max-height 0.5s ease-in,
+        opacity 0.3s ease-in;
+}
+
+.server-item {
+    animation: fadeIn 0.5s ease-out;
+    margin: 15px 8px !important;
+    padding: 15px;
+    background: var(--bg);
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.server-item h3 {
+    margin-top: 0;
+    color: var(--dark);
+    font-size: 1.1rem;
+}
+
+.server-item .metrics {
+    margin-top: 10px;
+}
+
+/* Fix for important typo */
+.server-item {
+    margin: 8px 8px !important;
+}
     </style>
 </head>
 <body>
     <header>
         <h1>Corvax SLA Monitor</h1>
-        <div class="server-selector">
-            <div class="server-dropdown">
-                <button class="server-dropbtn">Select Server ▼</button>
-                <div class="server-dropdown-content" id="server-dropdown">
-                </div>
-            </div>
-        </div>
     </header>
 
     <main>

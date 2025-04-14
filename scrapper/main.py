@@ -13,7 +13,11 @@ from subprocess import Popen, PIPE, STDOUT
 from pyping_py3 import ping
 
 def get_ping_time(host):
-    return ping(host, udp=True).avg_rtt
+    try:
+        res = ping(host, quiet_output=True).avg_rtt
+        return res if res is not None else -1
+    except:
+        return -1
 
 
 async def fetch():
@@ -21,18 +25,21 @@ async def fetch():
                                  org=env.get('INFLUXDB_ORG'))
     write_api, query_api = client.write_api(), client.query_api()
 
-    async with ClientSession() as sess:
-        async with sess.get('https://station14.ru/favicon.ico') as resp:
-            status_point = (Point("status_probe")
-                            .tag('status', 'ok' if resp.ok else 'err')
-                            .field('status_code', resp.status))
-            ping = get_ping_time('station14.ru')
-            ping_point = (Point("ping_probe")
-                          .tag('status', 'ok' if ping != -1 else 'err')
-                          .field('ping', ping))
+    sess = ClientSession()
+    resp = await sess.get('https://station14.ru/favicon.ico')
+    status_point = (Point("status_probe")
+                    .tag('status', 'ok' if resp.ok else 'err')
+                    .field('status_code', resp.status))
 
-            await write_api.write(bucket=env.get('INFLUXDB_BUCKET'), org=env.get('INFLUXDB_ORG'), record=status_point)
-            await write_api.write(bucket=env.get('INFLUXDB_BUCKET'), org=env.get('INFLUXDB_ORG'), record=ping_point)
+    ping_ms = get_ping_time('104.21.85.186') # hardcoded IP, troubles in resolving
+    ping_point = (Point("ping_probe")
+                  .tag('status', 'ok' if ping_ms != -1 else 'err')
+                  .field('ping', int(float(ping_ms))))
+
+    await write_api.write(bucket=env.get('INFLUXDB_BUCKET'), org=env.get('INFLUXDB_ORG'), record=status_point)
+    await write_api.write(bucket=env.get('INFLUXDB_BUCKET'), org=env.get('INFLUXDB_ORG'), record=ping_point)
+    resp.close()
+    await sess.close()
 
 def fetch_():
     asyncio.run(fetch())
