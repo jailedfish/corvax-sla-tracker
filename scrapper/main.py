@@ -10,12 +10,13 @@ load_dotenv()
 
 import shlex
 from subprocess import Popen, PIPE, STDOUT
-from pyping_py3 import ping, UnknownHostError
+from pyping_py3 import ping
 
 def get_ping_time(host):
     try:
-        return ping(host, udp=True).avg_rtt
-    except UnknownHostError:
+        res = ping(host, quiet_output=True).avg_rtt
+        return res if res is not None else -1
+    except:
         return -1
 
 
@@ -30,10 +31,10 @@ async def fetch():
                     .tag('status', 'ok' if resp.ok else 'err')
                     .field('status_code', resp.status))
 
-    ping_ms = get_ping_time('station14.ru')
+    ping_ms = get_ping_time('104.21.85.186') # hardcoded IP, troubles in resolving
     ping_point = (Point("ping_probe")
                   .tag('status', 'ok' if ping_ms != -1 else 'err')
-                  .field('ping', ping_ms))
+                  .field('ping', int(float(ping_ms))))
 
     await write_api.write(bucket=env.get('INFLUXDB_BUCKET'), org=env.get('INFLUXDB_ORG'), record=status_point)
     await write_api.write(bucket=env.get('INFLUXDB_BUCKET'), org=env.get('INFLUXDB_ORG'), record=ping_point)
